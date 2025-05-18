@@ -8,7 +8,7 @@ class HTMLNode:
     def __repr__(self) -> str:
         return f"HTMLNode(tag: {self.tag}, value: {self.value}, children: {self.children}, props: {self.props})"
 
-    def to_html(self):
+    def to_html(self) -> str:
         raise NotImplementedError("Not implemented on HTMLNode")
 
     def props_to_html(self) -> str:
@@ -23,7 +23,7 @@ class LeafNode(HTMLNode):
     def __init__(self, tag=None, value=None, props=None) -> None:
         super().__init__(tag, value, None, props)
 
-    def to_html(self):
+    def to_html(self) -> str:
         if self.value is None:
             raise ValueError("'value' is required in LeafNode")
         if self.tag is None:
@@ -36,7 +36,7 @@ class ParentNode(HTMLNode):
     def __init__(self, tag=None, children=None, props=None) -> None:
         super().__init__(tag, None, children, props)
 
-    def to_html(self):
+    def to_html(self) -> str:
         if self.tag is None:
             raise ValueError("'tag' is required in ParentNode")
         elif self.children is None or not isinstance(self.children, list):
