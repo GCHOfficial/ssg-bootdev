@@ -1,7 +1,7 @@
 import re
 
 from blocks import BlockType, block_to_block_type, markdown_to_blocks
-from htmlnode import HTMLNode, LeafNode, ParentNode
+from htmlnode import HTMLNode, ParentNode
 from textnode import TextNode, TextType
 
 
@@ -178,11 +178,15 @@ def markdown_to_html_node(markdown) -> HTMLNode:
                         if currentitem != "" and nextitem != "":
                             currentitem += " " + nextitem
                         elif currentitem != "" and nextitem == "":
-                            listitems.append(LeafNode("p", currentitem))
+                            listitems.append(
+                                ParentNode("p", text_to_children(currentitem))
+                            )
                             break
                         if j == len(lines) - 1:
                             (
-                                listitems.append(LeafNode("p", currentitem))
+                                listitems.append(
+                                    ParentNode("p", text_to_children(currentitem))
+                                )
                                 if currentitem != ""
                                 else ()
                             )
@@ -191,9 +195,13 @@ def markdown_to_html_node(markdown) -> HTMLNode:
                 listitems = []
                 for listitem in block.split("\n"):
                     listitems.append(
-                        LeafNode(
+                        ParentNode(
                             "li",
-                            re.findall(r"^-(.*)$", listitem, re.MULTILINE)[0].lstrip(),
+                            text_to_children(
+                                re.findall(r"^-(.*)$", listitem, re.MULTILINE)[
+                                    0
+                                ].lstrip()
+                            ),
                         )
                     )
                 children.append(
@@ -206,11 +214,13 @@ def markdown_to_html_node(markdown) -> HTMLNode:
                 listitems = []
                 for listitem in block.split("\n"):
                     listitems.append(
-                        LeafNode(
+                        ParentNode(
                             "li",
-                            re.findall(r"^\d+.(.+)$", listitem, re.MULTILINE)[
-                                0
-                            ].lstrip(),
+                            text_to_children(
+                                re.findall(r"^\d+.(.+)$", listitem, re.MULTILINE)[
+                                    0
+                                ].lstrip()
+                            ),
                         )
                     )
                 children.append(

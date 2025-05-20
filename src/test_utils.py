@@ -338,9 +338,9 @@ This is another paragraph with _italic_ text and `code` here
 
     def test_markdown_to_html_node_headings(self):
         md = """
-# This is a headings test
+# This is a **headings** test
 
-## With multiple headings
+## With _multiple_ `headings`
 
 ###Improper syntax
 
@@ -351,7 +351,7 @@ This is another paragraph with _italic_ text and `code` here
         html = node.to_html()
         self.assertEqual(
             html,
-            "<div><h1>This is a headings test</h1><h2>With multiple headings</h2><p>###Improper syntax</p><p>####### And a non heading</p></div>",
+            "<div><h1>This is a <b>headings</b> test</h1><h2>With <i>multiple</i> <code>headings</code></h2><p>###Improper syntax</p><p>####### And a non heading</p></div>",
         )
 
     def test_markdown_to_html_node_headings_no_space(self):
@@ -382,12 +382,12 @@ the **same** even with inline stuff
     def test_markdown_to_html_node_quote(self):
         md = """
 > This is a list
-> of Markdown quotes
+> of _Markdown_ quotes
 
 >
-> This should have
+> This **should** have
 >
-> multiple paragraphs
+> `multiple` paragraphs
 > to check
 
 > and another one
@@ -398,13 +398,13 @@ with quotes misused
         html = node.to_html()
         self.assertEqual(
             html,
-            "<div><blockquote><p>This is a list of Markdown quotes</p></blockquote><blockquote><p>This should have</p><p>multiple paragraphs to check</p></blockquote><p>> and another one with quotes misused</p></div>",
+            "<div><blockquote><p>This is a list of <i>Markdown</i> quotes</p></blockquote><blockquote><p>This <b>should</b> have</p><p><code>multiple</code> paragraphs to check</p></blockquote><p>> and another one with quotes misused</p></div>",
         )
 
     def test_markdown_to_html_node_ul(self):
         md = """
-- This is
-- an unordered
+- **This** is
+- an _unordered_
 - list
 
 - with multiple lines
@@ -417,13 +417,13 @@ with quotes misused
         html = node.to_html()
         self.assertEqual(
             html,
-            "<div><ul><li>This is</li><li>an unordered</li><li>list</li></ul><p>- with multiple lines -</p><p>-and improper code</p></div>",
+            "<div><ul><li><b>This</b> is</li><li>an <i>unordered</i></li><li>list</li></ul><p>- with multiple lines -</p><p>-and improper code</p></div>",
         )
 
     def test_markdown_to_html_node_ol(self):
         md = """
-1. This is
-2. an ordered
+1. This **is**
+2. an `ordered`
 3. list
 
 1. with multiple lines
@@ -438,5 +438,5 @@ with quotes misused
         html = node.to_html()
         self.assertEqual(
             html,
-            "<div><ol><li>This is</li><li>an ordered</li><li>list</li></ol><p>1. with multiple lines 2.</p><p>3. and improper</p><p>1.code</p></div>",
+            "<div><ol><li>This <b>is</b></li><li>an <code>ordered</code></li><li>list</li></ol><p>1. with multiple lines 2.</p><p>3. and improper</p><p>1.code</p></div>",
         )
