@@ -1,4 +1,6 @@
+import os
 import re
+import shutil
 
 from blocks import BlockType, block_to_block_type, markdown_to_blocks
 from htmlnode import HTMLNode, ParentNode
@@ -171,25 +173,28 @@ def markdown_to_html_node(markdown) -> HTMLNode:
                     currentitem = re.findall(r"^>(.*)$", lines[i], re.MULTILINE)[
                         0
                     ].lstrip()
-                    for j in range(i + 1, len(lines)):
-                        nextitem = re.findall(r"^>(.*)$", lines[j], re.MULTILINE)[
-                            0
-                        ].lstrip()
-                        if currentitem != "" and nextitem != "":
-                            currentitem += " " + nextitem
-                        elif currentitem != "" and nextitem == "":
-                            listitems.append(
-                                ParentNode("p", text_to_children(currentitem))
-                            )
-                            break
-                        if j == len(lines) - 1:
-                            (
-                                listitems.append(
-                                    ParentNode("p", text_to_children(currentitem))
+                    if len(lines) == 1:
+                        listitems.extend(text_to_children(currentitem))
+                    else:
+                        for j in range(i + 1, len(lines)):
+                            nextitem = re.findall(r"^>(.*)$", lines[j], re.MULTILINE)[
+                                0
+                            ].lstrip()
+                            if currentitem != "" and nextitem != "":
+                                currentitem += " " + nextitem
+                            elif currentitem != "" and nextitem == "":
+                                listitems.extend(text_to_children(currentitem))
+                                break
+                            if j == len(lines) - 1:
+                                (
+                                    listitems.extend(text_to_children(currentitem))
+                                    if currentitem != ""
+                                    else (
+                                        listitems.extend(text_to_children(nextitem))
+                                        if nextitem != ""
+                                        else ()
+                                    )
                                 )
-                                if currentitem != ""
-                                else ()
-                            )
                 children.append(ParentNode("blockquote", listitems))
             case BlockType.ULIST:
                 listitems = []
@@ -230,3 +235,70 @@ def markdown_to_html_node(markdown) -> HTMLNode:
                     )
                 )
     return ParentNode("div", children)
+
+
+def copy_static(static_path, docs_path) -> None:
+    if os.path.exists(docs_path):
+        for item in os.listdir(docs_path):
+            item_path = os.path.join(docs_path, item)
+            if os.path.isdir(item_path):
+                shutil.rmtree(item_path)
+            else:
+                os.remove(item_path)
+    else:
+        os.mkdir(docs_path)
+    recursive_copy(static_path, docs_path)
+
+
+def recursive_copy(folder, destination) -> None:
+    if not os.path.exists(folder):
+        print("Folder to copy doesn't exist")
+        return
+    if not os.path.exists(destination):
+        os.mkdir(destination)
+    for item in os.listdir(folder):
+        item_path = os.path.join(folder, item)
+        if os.path.isdir(item_path):
+            recursive_copy(item_path, os.path.join(destination, item))
+        else:
+            shutil.copy(item_path, os.path.join(destination, item))
+
+
+def extract_title(markdown) -> str:
+    for line in markdown.split("\n"):
+        if line.startswith("# "):
+            return line.replace("#", "").lstrip()
+    raise Exception("Title not found")
+
+
+def generate_page(from_path, template_path, dest_path, basepath):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+    with open(from_path, "r") as f:
+        markdown = f.read()
+    with open(template_path, "r") as f:
+        template = f.read()
+    title = extract_title(markdown)
+    content = markdown_to_html_node(markdown).to_html()
+    template = template.replace("{{ Title }}", title)
+    template = template.replace("{{ Content }}", content)
+    template = template.replace('href="/', f'href="{basepath}')
+    template = template.replace('src="/', f'src="{basepath}')
+    with open(dest_path, "w") as f:
+        f.write(template)
+
+
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath):
+    for item in os.listdir(dir_path_content):
+        item_path = os.path.join(dir_path_content, item)
+        if os.path.isdir(item_path):
+            os.mkdir(os.path.join(dest_dir_path, item))
+            generate_pages_recursive(
+                item_path, template_path, os.path.join(dest_dir_path, item), basepath
+            )
+        else:
+            generate_page(
+                item_path,
+                template_path,
+                os.path.join(dest_dir_path, item.replace(".md", ".html")),
+                basepath,
+            )
