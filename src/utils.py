@@ -174,7 +174,7 @@ def markdown_to_html_node(markdown) -> HTMLNode:
                         0
                     ].lstrip()
                     if len(lines) == 1:
-                        listitems.extend(text_to_children(currentitem))
+                        listitems.append(ParentNode("p", text_to_children(currentitem)))
                     else:
                         for j in range(i + 1, len(lines)):
                             nextitem = re.findall(r"^>(.*)$", lines[j], re.MULTILINE)[
@@ -183,14 +183,20 @@ def markdown_to_html_node(markdown) -> HTMLNode:
                             if currentitem != "" and nextitem != "":
                                 currentitem += " " + nextitem
                             elif currentitem != "" and nextitem == "":
-                                listitems.extend(text_to_children(currentitem))
+                                listitems.append(
+                                    ParentNode("p", text_to_children(currentitem))
+                                )
                                 break
                             if j == len(lines) - 1:
                                 (
-                                    listitems.extend(text_to_children(currentitem))
+                                    listitems.append(
+                                        ParentNode("p", text_to_children(currentitem))
+                                    )
                                     if currentitem != ""
                                     else (
-                                        listitems.extend(text_to_children(nextitem))
+                                        listitems.append(
+                                            ParentNode("p", text_to_children(nextitem))
+                                        )
                                         if nextitem != ""
                                         else ()
                                     )
