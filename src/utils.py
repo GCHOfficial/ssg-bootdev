@@ -190,7 +190,7 @@ def markdown_to_html_node(markdown) -> HTMLNode:
                 if current_paragraph != []:
                     paragraph_text = " ".join(current_paragraph)
                     listitems.append(ParentNode("p", text_to_children(paragraph_text)))
-                    children.append(ParentNode("blockquote", listitems))
+                children.append(ParentNode("blockquote", listitems))
             case BlockType.ULIST:
                 listitems = []
                 for listitem in block.split("\n"):
