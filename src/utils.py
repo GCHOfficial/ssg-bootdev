@@ -1,7 +1,6 @@
 import os
 import re
 import shutil
-from os.path import isdir
 
 from blocks import BlockType, block_to_block_type, markdown_to_blocks
 from htmlnode import HTMLNode, ParentNode
