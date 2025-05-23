@@ -386,8 +386,8 @@ the **same** even with inline stuff
 
 >
 > This **should** have
->
 > `multiple` paragraphs
+>
 > to check
 
 > and another one
@@ -398,7 +398,7 @@ with quotes misused
         html = node.to_html()
         self.assertEqual(
             html,
-            "<div><blockquote><p>This is a list of <i>Markdown</i> quotes</p></blockquote><blockquote><p>This <b>should</b> have</p><p><code>multiple</code> paragraphs to check</p></blockquote><p>> and another one with quotes misused</p></div>",
+            "<div><blockquote><p>This is a list of <i>Markdown</i> quotes</p></blockquote><blockquote><p>This <b>should</b> have <code>multiple</code> paragraphs</p><p>to check</p></blockquote><p>> and another one with quotes misused</p></div>",
         )
 
     def test_markdown_to_html_node_ul(self):

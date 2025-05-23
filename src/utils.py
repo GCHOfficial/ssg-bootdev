@@ -1,6 +1,7 @@
 import os
 import re
 import shutil
+from os.path import isdir
 
 from blocks import BlockType, block_to_block_type, markdown_to_blocks
 from htmlnode import HTMLNode, ParentNode
@@ -169,39 +170,27 @@ def markdown_to_html_node(markdown) -> HTMLNode:
             case BlockType.QUOTE:
                 listitems = []
                 lines = block.split("\n")
-                for i in range(0, len(lines)):
-                    currentitem = re.findall(r"^>(.*)$", lines[i], re.MULTILINE)[
-                        0
-                    ].lstrip()
-                    if len(lines) == 1:
-                        listitems.append(ParentNode("p", text_to_children(currentitem)))
+                quote_lines = []
+                for line in lines:
+                    match = re.match(r"^>(.*)$", line)
+                    if match:
+                        content = match.group(1).lstrip()
+                        quote_lines.append(content)
+                current_paragraph = []
+                for line in quote_lines:
+                    if line != "":
+                        current_paragraph.append(line)
                     else:
-                        for j in range(i + 1, len(lines)):
-                            nextitem = re.findall(r"^>(.*)$", lines[j], re.MULTILINE)[
-                                0
-                            ].lstrip()
-                            if currentitem != "" and nextitem != "":
-                                currentitem += " " + nextitem
-                            elif currentitem != "" and nextitem == "":
-                                listitems.append(
-                                    ParentNode("p", text_to_children(currentitem))
-                                )
-                                break
-                            if j == len(lines) - 1:
-                                (
-                                    listitems.append(
-                                        ParentNode("p", text_to_children(currentitem))
-                                    )
-                                    if currentitem != ""
-                                    else (
-                                        listitems.append(
-                                            ParentNode("p", text_to_children(nextitem))
-                                        )
-                                        if nextitem != ""
-                                        else ()
-                                    )
-                                )
-                children.append(ParentNode("blockquote", listitems))
+                        if current_paragraph != []:
+                            paragraph_text = " ".join(current_paragraph)
+                            listitems.append(
+                                ParentNode("p", text_to_children(paragraph_text))
+                            )
+                            current_paragraph = []
+                if current_paragraph != []:
+                    paragraph_text = " ".join(current_paragraph)
+                    listitems.append(ParentNode("p", text_to_children(paragraph_text)))
+                    children.append(ParentNode("blockquote", listitems))
             case BlockType.ULIST:
                 listitems = []
                 for listitem in block.split("\n"):
